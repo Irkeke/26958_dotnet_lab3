@@ -1,0 +1,9 @@
+using CareerPathExplorer.Controllers;
+using CareerPathExplorer.Models;
+namespace CareerPathExplorer.Views;
+public class AssessmentForm:Form {
+ User user;AssessmentController controller=new();Dictionary<int,Option> answers=new();
+ public AssessmentForm(User u){user=u;Text="Career assessment";Width=850;Height=650;StartPosition=FormStartPosition.CenterParent;var outer=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=2,Padding=new Padding(15)};outer.RowStyles.Add(new RowStyle(SizeType.Percent,100));outer.RowStyles.Add(new RowStyle(SizeType.AutoSize));var panel=new FlowLayoutPanel{Dock=DockStyle.Fill,FlowDirection=FlowDirection.TopDown,WrapContents=false,AutoScroll=true};outer.Controls.Add(panel,0,0);
+ try{foreach(var q in controller.Questions()){var group=new GroupBox{Text=q.Text,Width=760,Height=125};var options=new FlowLayoutPanel{Dock=DockStyle.Fill,FlowDirection=FlowDirection.TopDown};foreach(var o in q.Options){var rb=new RadioButton{Text=o.Text,AutoSize=true};rb.CheckedChanged+=(_,_)=>{if(rb.Checked)answers[q.Id]=o;};options.Controls.Add(rb);}group.Controls.Add(options);panel.Controls.Add(group);}}catch(Exception ex){MessageBox.Show(ex.Message);}
+ var submit=new Button{Text="Submit assessment",AutoSize=true};submit.Click+=(_,_)=>{try{int id=controller.Submit(user.Id,answers);var rec=controller.Recommendations(id);string text=rec.Count==0?"No matching careers found.":string.Join("\n\n",rec.Select(x=>x.Name+"\n"+x.Description));MessageBox.Show("Assessment saved.\n\nRecommendations:\n"+text);Close();}catch(Exception ex){MessageBox.Show(ex.Message,"Assessment validation");}};outer.Controls.Add(submit,0,1);Controls.Add(outer);}
+}
